@@ -1,4 +1,4 @@
-use std::fmt::Display;
+use std::fmt::{Display, Formatter, Result};
 
 #[derive(Debug, PartialEq, Clone)]
 pub enum Token {
@@ -6,7 +6,7 @@ pub enum Token {
     Eof,
 
     Identifier(String),
-    Int(String),
+    Integer(String),
     Float(String),
     String(String),
 
@@ -44,15 +44,15 @@ pub enum Token {
 }
 
 impl Display for Token {
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        match &self {
+    fn fmt(&self, f: &mut Formatter<'_>) -> Result {
+        match self {
             Token::Illegal => write!(f, "ILLEGAL"),
             Token::Eof => write!(f, "EOF"),
 
-            Token::Identifier(identifier) => write!(f, "{}", identifier),
-            Token::Int(int) => write!(f, "{}", int),
-            Token::Float(float) => write!(f, "{}", float),
-            Token::String(s) => write!(f, "\"{}\"", s),
+            Token::Identifier(identifier) => write!(f, "{identifier}"),
+            Token::Integer(int) => write!(f, "{int}"),
+            Token::Float(float) => write!(f, "{float}"),
+            Token::String(s) => write!(f, "\"{s}\""),
 
             Token::Assign => write!(f, "="),
             Token::Plus => write!(f, "+"),
