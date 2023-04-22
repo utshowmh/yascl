@@ -1,6 +1,6 @@
 use std::{iter::Peekable, str::Chars};
 
-use crate::token::{self, lookup_identifier, Token};
+use crate::token::{lookup_identifier, Token};
 
 pub struct Lexer {
     source: String,
@@ -74,7 +74,7 @@ impl Lexer {
                         return Token::Integer(integer);
                     }
                 } else {
-                    token = Token::Illegal
+                    token = Token::Illegal(character)
                 }
             }
         }
@@ -108,6 +108,7 @@ impl Lexer {
 
     fn read_string(&mut self) -> String {
         let position = self.position + 1;
+        // FIXME: check for string termination and report an error in the case of unterminated ones.
         loop {
             self.read_next_character();
             if self.character == '\u{0}' || self.character == '"' {
@@ -132,11 +133,11 @@ impl Lexer {
 }
 
 fn is_letter(character: char) -> bool {
-    character == '_' || 'a' <= character && character <= 'z' || 'A' <= character && character <= 'Z'
+    character == '_' || ('a'..='z').contains(&character) || ('A'..='Z').contains(&character)
 }
 
 fn is_digit(character: char) -> bool {
-    '0' <= character && character <= '9'
+    ('0'..='9').contains(&character)
 }
 
 fn is_whitespace(character: char) -> bool {
