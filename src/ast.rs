@@ -1,5 +1,7 @@
 use std::fmt::{Display, Formatter, Result};
 
+use crate::token::Token;
+
 #[derive(Debug)]
 pub struct Program {
     pub statements: Vec<Statement>,
@@ -61,8 +63,8 @@ pub enum Expression {
     Array(Vec<Expression>),
     Hash(Vec<(Expression, Expression)>),
     Index(Box<Expression>, Box<Expression>),
-    Prefix(Prefix, Box<Expression>),
-    Infix(Box<Expression>, Infix, Box<Expression>),
+    Prefix(Token, Box<Expression>),
+    Infix(Box<Expression>, Token, Box<Expression>),
     If(Box<Expression>, BlockStatement, Option<BlockStatement>),
     Function(Vec<String>, BlockStatement),
     Call(Box<Expression>, Vec<Expression>),
@@ -79,8 +81,8 @@ impl Display for Expression {
             Expression::Array(values) => write!(f, "{}", comma_separated_values(values)),
             Expression::Hash(pairs) => write!(f, "{}", comma_separated_pairs(pairs)),
             Expression::Index(left, index) => write!(f, "({left}[{index}])"),
-            Expression::Prefix(operator, right) => write!(f, "{operator}{right}"),
-            Expression::Infix(left, operator, right) => write!(f, "{left}{operator}{right}"),
+            Expression::Prefix(operator, right) => write!(f, "{operator} {right}"),
+            Expression::Infix(left, operator, right) => write!(f, "{left} {operator} {right}"),
             Expression::If(condition, consequence, alternative) => {
                 write!(f, "if {condition} {consequence}")?;
                 if let Some(alternative) = alternative {
@@ -94,48 +96,6 @@ impl Display for Expression {
             Expression::Call(function, arguments) => {
                 write!(f, "{function}({})", comma_separated_values(arguments))
             }
-        }
-    }
-}
-
-#[derive(Debug)]
-pub enum Prefix {
-    Bang,
-    Minus,
-}
-
-impl Display for Prefix {
-    fn fmt(&self, f: &mut Formatter<'_>) -> Result {
-        match self {
-            Prefix::Bang => write!(f, "!"),
-            Prefix::Minus => write!(f, "-"),
-        }
-    }
-}
-
-#[derive(Debug)]
-pub enum Infix {
-    Plus,
-    Minus,
-    Asterisk,
-    Slash,
-    Lesser,
-    Greater,
-    Equal,
-    NotEqual,
-}
-
-impl Display for Infix {
-    fn fmt(&self, f: &mut Formatter<'_>) -> Result {
-        match self {
-            Infix::Plus => write!(f, "+"),
-            Infix::Minus => write!(f, "-"),
-            Infix::Asterisk => write!(f, "*"),
-            Infix::Slash => write!(f, "/"),
-            Infix::Lesser => write!(f, "<"),
-            Infix::Greater => write!(f, ">"),
-            Infix::Equal => write!(f, "=="),
-            Infix::NotEqual => write!(f, "!="),
         }
     }
 }

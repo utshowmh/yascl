@@ -22,7 +22,20 @@ impl Lexer {
         lexer
     }
 
-    pub fn next_token(&mut self) -> Token {
+    pub fn lex(&mut self) -> Vec<Token> {
+        let mut tokens = vec![];
+        let mut end_of_file = false;
+        while !end_of_file {
+            let token = self.next_token();
+            if let Token::Eof = token {
+                end_of_file = true;
+            }
+            tokens.push(token);
+        }
+        tokens
+    }
+
+    fn next_token(&mut self) -> Token {
         self.skip_whitespace();
 
         let token: Token;
@@ -74,7 +87,7 @@ impl Lexer {
                         return Token::Integer(integer);
                     }
                 } else {
-                    token = Token::Illegal(character)
+                    token = Token::Illegal
                 }
             }
         }
