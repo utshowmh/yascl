@@ -1,25 +1,26 @@
 use std::io::{stdin, stdout, Write};
 
-use crate::{lexer::Lexer, parser::Parser};
+use crate::{error::Error, lexer::Lexer, parser::Parser};
 
-pub fn start() {
+pub fn repl() {
     loop {
-        let source = ask_for_input("|> ");
-        let mut lexer = Lexer::new(source);
-        let tokens = lexer.lex();
-        let mut parser = Parser::new(tokens);
-        let program = parser.parse_program();
-        let errors = parser.errors();
-        if errors.is_empty() {
-            for statement in program.statements {
-                println!("{statement:#?}");
-            }
-        } else {
-            for error in errors {
-                eprintln!("{}", error.report());
-            }
+        match run() {
+            Ok(()) => {}
+            Err(error) => error.report(),
         }
     }
+}
+
+fn run() -> Result<(), Error> {
+    let source = ask_for_input("|> ");
+    let mut lexer = Lexer::new(source);
+    let tokens = lexer.lex()?;
+    let mut parser = Parser::new(tokens);
+    let program = parser.parse_program()?;
+    for statement in program.statements {
+        println!("{statement:#?}");
+    }
+    Ok(())
 }
 
 fn ask_for_input(prompt: &str) -> String {

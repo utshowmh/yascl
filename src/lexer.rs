@@ -1,6 +1,9 @@
 use std::{iter::Peekable, str::Chars};
 
-use crate::token::{lookup_identifier, Token};
+use crate::{
+    error::Error,
+    token::{lookup_identifier, Token},
+};
 
 pub struct Lexer {
     source: String,
@@ -22,20 +25,20 @@ impl Lexer {
         lexer
     }
 
-    pub fn lex(&mut self) -> Vec<Token> {
+    pub fn lex(&mut self) -> Result<Vec<Token>, Error> {
         let mut tokens = vec![];
         let mut end_of_file = false;
         while !end_of_file {
-            let token = self.next_token();
+            let token = self.next_token()?;
             if let Token::Eof = token {
                 end_of_file = true;
             }
             tokens.push(token);
         }
-        tokens
+        Ok(tokens)
     }
 
-    fn next_token(&mut self) -> Token {
+    fn next_token(&mut self) -> Result<Token, Error> {
         self.skip_whitespace();
 
         let token: Token;
@@ -72,28 +75,28 @@ impl Lexer {
             '}' => token = Token::RightBrace,
             '[' => token = Token::LeftBracket,
             ']' => token = Token::RightBracket,
-            '"' => token = Token::String(self.read_string()),
+            '"' => token = Token::String(self.read_string()?),
             character => {
                 if is_letter(character) {
                     let identifier = self.read_identifier();
-                    return lookup_identifier(identifier);
+                    return Ok(lookup_identifier(identifier));
                 } else if is_digit(character) {
                     let integer = self.read_number();
                     if self.character == '.' && is_digit(self.peek_char()) {
                         self.read_next_character();
                         let fraction = self.read_number();
-                        return Token::Float(format!("{integer}.{fraction}"));
+                        return Ok(Token::Float(format!("{integer}.{fraction}")));
                     } else {
-                        return Token::Integer(integer);
+                        return Ok(Token::Integer(integer));
                     }
                 } else {
-                    token = Token::Illegal
+                    return Err(Error::Lexer(format!("Unexpected character '{character}'")));
                 }
             }
         }
 
         self.read_next_character();
-        token
+        Ok(token)
     }
 
     fn skip_whitespace(&mut self) {
@@ -104,7 +107,6 @@ impl Lexer {
 
     fn read_identifier(&mut self) -> &str {
         let position = self.position;
-        // The first character is checked to be a letter.
         while is_letter(self.character) || is_digit(self.character) {
             self.read_next_character();
         }
@@ -119,16 +121,19 @@ impl Lexer {
         self.source[position..self.position].to_string()
     }
 
-    fn read_string(&mut self) -> String {
+    fn read_string(&mut self) -> Result<String, Error> {
         let position = self.position + 1;
-        // FIXME: check for string termination and report an error in the case of unterminated ones.
         loop {
             self.read_next_character();
             if self.character == '\u{0}' || self.character == '"' {
                 break;
             }
         }
-        self.source[position..self.position].to_string()
+        if self.character == '\u{0}' {
+            Err(Error::Lexer(format!("Unterminated string")))
+        } else {
+            Ok(self.source[position..self.position].to_string())
+        }
     }
 
     fn read_next_character(&mut self) {

@@ -2,27 +2,12 @@ use std::vec;
 
 use crate::{
     ast::{BlockStatement, Expression, Program, Statement},
+    error::Error,
     token::Token,
 };
 
-#[derive(Debug)]
-pub struct ParseError {
-    token: Token,
-    expected: Token,
-}
-
-impl ParseError {
-    pub fn report(&self) -> String {
-        format!(
-            "Unexpected token '{}', expected '{}'",
-            self.token, self.expected
-        )
-    }
-}
-
 pub struct Parser {
     tokens: Vec<Token>,
-    errors: Vec<ParseError>,
     position: usize,
 }
 
@@ -30,25 +15,17 @@ impl Parser {
     pub fn new(tokens: Vec<Token>) -> Parser {
         Parser {
             tokens,
-            errors: vec![],
             position: 0,
         }
     }
 
-    pub fn errors(&self) -> &[ParseError] {
-        &self.errors
-    }
-
-    pub fn parse_program(&mut self) -> Program {
+    pub fn parse_program(&mut self) -> Result<Program, Error> {
         let mut statements = vec![];
         while !self.end_of_tokens() {
-            match self.parse_statement() {
-                Ok(statement) => statements.push(statement),
-                Err(error) => self.errors.push(error),
-            }
+            statements.push(self.parse_statement()?);
             self.advance_position();
         }
-        Program { statements }
+        Ok(Program { statements })
     }
 
     fn peek(&self, offset: usize) -> &Token {
@@ -82,19 +59,20 @@ impl Parser {
         tokens.contains(self.current_token())
     }
 
-    fn expect_token(&mut self, expected: Token) -> Result<(), ParseError> {
+    fn expect_token(&mut self, expected: Token) -> Result<(), Error> {
         if expected.eq(self.current_token()) {
             self.advance_position();
             Ok(())
         } else {
-            Err(ParseError {
-                token: self.current_token().to_owned(),
-                expected,
-            })
+            Err(Error::Parser(format!(
+                "Unexpected token '{}', expected '{}'",
+                self.current_token(),
+                expected
+            )))
         }
     }
 
-    fn parse_block_statement(&mut self) -> Result<BlockStatement, ParseError> {
+    fn parse_block_statement(&mut self) -> Result<BlockStatement, Error> {
         let mut statements = vec![];
         self.expect_token(Token::LeftBrace)?;
         while Token::RightBrace.ne(self.current_token()) && Token::Eof.ne(self.current_token()) {
@@ -104,7 +82,7 @@ impl Parser {
         Ok(BlockStatement { statements })
     }
 
-    fn parse_statement(&mut self) -> Result<Statement, ParseError> {
+    fn parse_statement(&mut self) -> Result<Statement, Error> {
         match self.current_token() {
             Token::Let => self.parse_let_statement(),
             Token::Return => self.parse_return_statement(),
@@ -112,7 +90,7 @@ impl Parser {
         }
     }
 
-    fn parse_let_statement(&mut self) -> Result<Statement, ParseError> {
+    fn parse_let_statement(&mut self) -> Result<Statement, Error> {
         self.expect_token(Token::Let)?;
         if let Token::Identifier(identifier) = self.current_token().to_owned() {
             self.advance_position();
@@ -121,14 +99,14 @@ impl Parser {
             self.expect_token(Token::Semicolon)?;
             Ok(Statement::Let(identifier, value))
         } else {
-            Err(ParseError {
-                token: self.current_token().to_owned(),
-                expected: Token::Identifier("IDENTIFIER".to_owned()),
-            })
+            Err(Error::Parser(format!(
+                "Unexpected token '{}', expected IDENTIFIER",
+                self.current_token(),
+            )))
         }
     }
 
-    fn parse_return_statement(&mut self) -> Result<Statement, ParseError> {
+    fn parse_return_statement(&mut self) -> Result<Statement, Error> {
         self.expect_token(Token::Return)?;
         if Token::Semicolon.eq(self.current_token()) {
             self.advance_position();
@@ -140,21 +118,21 @@ impl Parser {
         }
     }
 
-    fn parse_expression_statement(&mut self) -> Result<Statement, ParseError> {
+    fn parse_expression_statement(&mut self) -> Result<Statement, Error> {
         let value = self.parse_expression()?;
         self.expect_token(Token::Semicolon)?;
         Ok(Statement::Expression(value))
     }
 
-    fn parse_expression(&mut self) -> Result<Expression, ParseError> {
+    fn parse_expression(&mut self) -> Result<Expression, Error> {
         self.parse_infix_expression()
     }
 
-    fn parse_infix_expression(&mut self) -> Result<Expression, ParseError> {
+    fn parse_infix_expression(&mut self) -> Result<Expression, Error> {
         self.parse_equality_expression()
     }
 
-    fn parse_equality_expression(&mut self) -> Result<Expression, ParseError> {
+    fn parse_equality_expression(&mut self) -> Result<Expression, Error> {
         let mut left = self.parse_comparison_expression()?;
         while self.current_token_in(&[Token::NotEqual, Token::Equal]) {
             let operator = self.next_token();
@@ -164,7 +142,7 @@ impl Parser {
         Ok(left)
     }
 
-    fn parse_comparison_expression(&mut self) -> Result<Expression, ParseError> {
+    fn parse_comparison_expression(&mut self) -> Result<Expression, Error> {
         let mut left = self.parse_term_expression()?;
         while self.current_token_in(&[Token::Lesser, Token::Greater]) {
             let operator = self.next_token();
@@ -174,7 +152,7 @@ impl Parser {
         Ok(left)
     }
 
-    fn parse_term_expression(&mut self) -> Result<Expression, ParseError> {
+    fn parse_term_expression(&mut self) -> Result<Expression, Error> {
         let mut left = self.parse_factor_expression()?;
         while self.current_token_in(&[Token::Plus, Token::Minus]) {
             let operator = self.next_token();
@@ -184,7 +162,7 @@ impl Parser {
         Ok(left)
     }
 
-    fn parse_factor_expression(&mut self) -> Result<Expression, ParseError> {
+    fn parse_factor_expression(&mut self) -> Result<Expression, Error> {
         let mut left = self.parse_prefix_expression()?;
         while self.current_token_in(&[Token::Asterisk, Token::Slash]) {
             let operator = self.next_token();
@@ -194,7 +172,7 @@ impl Parser {
         Ok(left)
     }
 
-    fn parse_prefix_expression(&mut self) -> Result<Expression, ParseError> {
+    fn parse_prefix_expression(&mut self) -> Result<Expression, Error> {
         if self.current_token_in(&[Token::Bang, Token::Minus]) {
             let operator = self.next_token();
             let right = self.parse_prefix_expression()?;
@@ -204,7 +182,7 @@ impl Parser {
         }
     }
 
-    fn parse_call_expression(&mut self) -> Result<Expression, ParseError> {
+    fn parse_call_expression(&mut self) -> Result<Expression, Error> {
         let expression = self.parse_literal_expression()?;
         match self.current_token() {
             Token::LeftParen => {
@@ -229,7 +207,7 @@ impl Parser {
         }
     }
 
-    fn parse_literal_expression(&mut self) -> Result<Expression, ParseError> {
+    fn parse_literal_expression(&mut self) -> Result<Expression, Error> {
         match self.current_token().to_owned() {
             Token::Function => {
                 self.advance_position();
@@ -242,10 +220,10 @@ impl Parser {
                         self.advance_position();
                         parameters.push(identifier)
                     } else {
-                        return Err(ParseError {
-                            token: self.current_token().to_owned(),
-                            expected: Token::Identifier("IDENTIFIER".to_owned()),
-                        });
+                        return Err(Error::Parser(format!(
+                            "Unexpected token '{}', expected IDENTIFIER",
+                            self.current_token(),
+                        )));
                     }
                     self.expect_token(Token::Comma)?;
                 }
@@ -326,10 +304,10 @@ impl Parser {
                     self.advance_position();
                     Ok(Expression::Identifier(identifier))
                 } else {
-                    Err(ParseError {
-                        token: self.current_token().to_owned(),
-                        expected: Token::Identifier("IDENTIFIER".to_owned()),
-                    })
+                    Err(Error::Parser(format!(
+                        "Unexpected token '{}', expected IDENTIFIER",
+                        self.current_token(),
+                    )))
                 }
             }
         }

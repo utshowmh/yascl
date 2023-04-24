@@ -2,7 +2,6 @@ use std::fmt::{Display, Formatter, Result};
 
 #[derive(Debug, PartialEq, Clone)]
 pub enum Token {
-    Illegal,
     Eof,
 
     Identifier(String),
@@ -46,8 +45,7 @@ pub enum Token {
 impl Display for Token {
     fn fmt(&self, f: &mut Formatter<'_>) -> Result {
         match self {
-            Token::Illegal => write!(f, "ILLEGAL"),
-            Token::Eof => write!(f, "EOF"),
+            Token::Eof => write!(f, "EndOfFile"),
 
             Token::Identifier(identifier) => write!(f, "{identifier}"),
             Token::Integer(int) => write!(f, "{int}"),
