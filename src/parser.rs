@@ -97,7 +97,7 @@ impl Parser {
     fn parse_block_statement(&mut self) -> Result<BlockStatement, ParseError> {
         let mut statements = vec![];
         self.expect_token(Token::LeftBrace)?;
-        while Token::LeftBrace.ne(self.current_token()) && Token::Eof.ne(self.current_token()) {
+        while Token::RightBrace.ne(self.current_token()) && Token::Eof.ne(self.current_token()) {
             statements.push(self.parse_statement()?);
         }
         self.expect_token(Token::RightBrace)?;
