@@ -3,5 +3,5 @@
 version = 3
 
 [[package]]
-name = "ascl"
+name = "yascl"
 version = "0.1.0"
