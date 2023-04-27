@@ -16,7 +16,7 @@ impl Display for Program {
     }
 }
 
-#[derive(Debug)]
+#[derive(Debug, Clone)]
 pub struct BlockStatement {
     pub statements: Vec<Statement>,
 }
@@ -35,7 +35,7 @@ impl Display for BlockStatement {
     }
 }
 
-#[derive(Debug)]
+#[derive(Debug, Clone)]
 pub enum Statement {
     Let(String, Expression),
     Return(Option<Expression>),
@@ -53,7 +53,7 @@ impl Display for Statement {
     }
 }
 
-#[derive(Debug)]
+#[derive(Debug, Clone)]
 pub enum Expression {
     Identifier(String),
     Integer(i64),

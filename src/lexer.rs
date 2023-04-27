@@ -130,7 +130,7 @@ impl Lexer {
             }
         }
         if self.character == '\u{0}' {
-            Err(Error::Lexer(format!("Unterminated string")))
+            Err(Error::Lexer("Unterminated string".to_string()))
         } else {
             Ok(self.source[position..self.position].to_string())
         }

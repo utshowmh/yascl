@@ -1,6 +1,8 @@
 mod ast;
+mod environment;
 mod error;
 mod lexer;
+mod object;
 mod parser;
 mod repl;
 mod token;
