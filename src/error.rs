@@ -2,6 +2,7 @@
 pub enum Error {
     Lexer(String),
     Parser(String),
+    Runtime(String),
 }
 
 impl Error {
@@ -12,6 +13,9 @@ impl Error {
             }
             Error::Parser(message) => {
                 eprintln!("ParserError: {message}.");
+            }
+            Error::Runtime(message) => {
+                eprintln!("RuntimeError: {message}.")
             }
         }
     }

@@ -29,7 +29,7 @@ impl fmt::Display for Object {
                     .iter()
                     .map(|v| v.to_string())
                     .collect::<Vec<String>>()
-                    .join(",");
+                    .join(", ");
                 write!(f, "[{values}]")
             }
             Object::Hash(pairs) => {
@@ -38,11 +38,11 @@ impl fmt::Display for Object {
                     .map(|(k, v)| format!("{k}: {v}"))
                     .collect::<Vec<String>>();
                 pairs.sort();
-                write!(f, "{{{}}}", pairs.join(","))
+                write!(f, "{{{}}}", pairs.join(", "))
             }
             Object::Return(value) => write!(f, "{}", *value),
             Object::Function(params, body, _) => {
-                write!(f, "fn({}) {}", params.join(","), body)
+                write!(f, "function({}) {}", params.join(","), body)
             }
             Object::Builtin(_) => write!(f, "builtin function"),
         }
