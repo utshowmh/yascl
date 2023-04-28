@@ -5,15 +5,16 @@ use std::{
 };
 
 use crate::{
-    ast::Program, environment::Environment, evaluator::evaluate, lexer::Lexer, parser::Parser,
+    ast::Program, builtin::get_builtin, environment::Environment, evaluator::evaluate,
+    lexer::Lexer, parser::Parser,
 };
 
 pub fn repl() {
-    let mut environment = Rc::new(RefCell::new(Environment::new()));
+    let mut environment = Rc::new(RefCell::new(get_builtin()));
 
     loop {
         environment = Rc::new(RefCell::new(Environment::extend(environment)));
-        let source = ask_for_input("|> ");
+        let source = ask_for_input("yascl => ");
         let mut lexer = Lexer::new(source);
         let tokens = lexer.lex().unwrap_or_else(|err| {
             err.report();
