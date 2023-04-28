@@ -188,11 +188,14 @@ impl Parser {
             Token::LeftParen => {
                 self.advance_position();
                 let mut arguments = vec![];
-                while Token::RightParen.ne(self.current_token())
-                    && Token::Eof.ne(self.current_token())
-                {
+                loop {
                     arguments.push(self.parse_expression()?);
-                    self.expect_token(Token::Comma)?;
+                    if Token::Comma.eq(self.current_token()) {
+                        self.advance_position();
+                        continue;
+                    } else {
+                        break;
+                    }
                 }
                 self.expect_token(Token::RightParen)?;
                 Ok(Expression::Call(Box::new(expression), arguments))
@@ -213,9 +216,7 @@ impl Parser {
                 self.advance_position();
                 self.expect_token(Token::LeftParen)?;
                 let mut parameters = vec![];
-                while Token::RightParen.ne(self.current_token())
-                    && Token::Eof.ne(self.current_token())
-                {
+                loop {
                     if let Token::Identifier(identifier) = self.current_token().to_owned() {
                         self.advance_position();
                         parameters.push(identifier)
@@ -225,7 +226,12 @@ impl Parser {
                             self.current_token(),
                         )));
                     }
-                    self.expect_token(Token::Comma)?;
+                    if Token::Comma.eq(self.current_token()) {
+                        self.advance_position();
+                        continue;
+                    } else {
+                        break;
+                    }
                 }
                 self.expect_token(Token::RightParen)?;
                 let body = self.parse_block_statement()?;
@@ -249,14 +255,17 @@ impl Parser {
             Token::LeftBrace => {
                 let mut pairs = vec![];
                 self.advance_position();
-                while Token::RightBrace.ne(self.current_token())
-                    && Token::Eof.ne(self.current_token())
-                {
+                loop {
                     let key = self.parse_expression()?;
                     self.expect_token(Token::Colon)?;
                     let value = self.parse_expression()?;
                     pairs.push((key, value));
-                    self.expect_token(Token::Comma)?;
+                    if Token::Comma.eq(self.current_token()) {
+                        self.advance_position();
+                        continue;
+                    } else {
+                        break;
+                    }
                 }
                 self.expect_token(Token::RightBrace)?;
                 Ok(Expression::Hash(pairs))
@@ -264,11 +273,14 @@ impl Parser {
             Token::LeftBracket => {
                 let mut expressions = vec![];
                 self.advance_position();
-                while Token::RightBracket.ne(self.current_token())
-                    && Token::Eof.ne(self.current_token())
-                {
+                loop {
                     expressions.push(self.parse_expression()?);
-                    self.expect_token(Token::Comma)?;
+                    if Token::Comma.eq(self.current_token()) {
+                        self.advance_position();
+                        continue;
+                    } else {
+                        break;
+                    }
                 }
                 self.expect_token(Token::RightBracket)?;
                 Ok(Expression::Array(expressions))
