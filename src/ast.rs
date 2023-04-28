@@ -28,9 +28,9 @@ impl Display for BlockStatement {
         } else {
             writeln!(f, "{{")?;
             for statement in &self.statements {
-                writeln!(f, "{statement}")?;
+                writeln!(f, "\t{statement}")?;
             }
-            writeln!(f, "}}")
+            write!(f, "}}")
         }
     }
 }

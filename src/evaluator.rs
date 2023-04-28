@@ -165,6 +165,8 @@ fn evaluate_expression(
                 (Object::Float(left), Token::Lesser, Object::Float(right)) => {
                     Ok(Object::Boolean(left < right))
                 }
+                (left, Token::Equal, right) => Ok(Object::Boolean(left.equal(&right))),
+                (left, Token::NotEqual, right) => Ok(Object::Boolean(!left.equal(&right))),
                 (left, operator, right) => Err(Error::Runtime(format!(
                     "Operator '{operator}' is not defined for '{left}' and '{right}'"
                 ))),

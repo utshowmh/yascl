@@ -188,13 +188,15 @@ impl Parser {
             Token::LeftParen => {
                 self.advance_position();
                 let mut arguments = vec![];
-                loop {
-                    arguments.push(self.parse_expression()?);
-                    if Token::Comma.eq(self.current_token()) {
-                        self.advance_position();
-                        continue;
-                    } else {
-                        break;
+                if Token::ne(self.current_token(), &Token::RightParen) {
+                    loop {
+                        arguments.push(self.parse_expression()?);
+                        if Token::eq(self.current_token(), &Token::Comma) {
+                            self.advance_position();
+                            continue;
+                        } else {
+                            break;
+                        }
                     }
                 }
                 self.expect_token(Token::RightParen)?;
@@ -216,21 +218,23 @@ impl Parser {
                 self.advance_position();
                 self.expect_token(Token::LeftParen)?;
                 let mut parameters = vec![];
-                loop {
-                    if let Token::Identifier(identifier) = self.current_token().to_owned() {
-                        self.advance_position();
-                        parameters.push(identifier)
-                    } else {
-                        return Err(Error::Parser(format!(
-                            "Unexpected token '{}', expected IDENTIFIER",
-                            self.current_token(),
-                        )));
-                    }
-                    if Token::Comma.eq(self.current_token()) {
-                        self.advance_position();
-                        continue;
-                    } else {
-                        break;
+                if Token::ne(self.current_token(), &Token::RightParen) {
+                    loop {
+                        if let Token::Identifier(identifier) = self.current_token().to_owned() {
+                            self.advance_position();
+                            parameters.push(identifier)
+                        } else {
+                            return Err(Error::Parser(format!(
+                                "Unexpected token '{}', expected IDENTIFIER",
+                                self.current_token(),
+                            )));
+                        }
+                        if Token::eq(self.current_token(), &Token::Comma) {
+                            self.advance_position();
+                            continue;
+                        } else {
+                            break;
+                        }
                     }
                 }
                 self.expect_token(Token::RightParen)?;
@@ -255,16 +259,18 @@ impl Parser {
             Token::LeftBrace => {
                 let mut pairs = vec![];
                 self.advance_position();
-                loop {
-                    let key = self.parse_expression()?;
-                    self.expect_token(Token::Colon)?;
-                    let value = self.parse_expression()?;
-                    pairs.push((key, value));
-                    if Token::Comma.eq(self.current_token()) {
-                        self.advance_position();
-                        continue;
-                    } else {
-                        break;
+                if Token::ne(self.current_token(), &Token::RightBrace) {
+                    loop {
+                        let key = self.parse_expression()?;
+                        self.expect_token(Token::Colon)?;
+                        let value = self.parse_expression()?;
+                        pairs.push((key, value));
+                        if Token::eq(self.current_token(), &Token::Comma) {
+                            self.advance_position();
+                            continue;
+                        } else {
+                            break;
+                        }
                     }
                 }
                 self.expect_token(Token::RightBrace)?;
@@ -273,13 +279,15 @@ impl Parser {
             Token::LeftBracket => {
                 let mut expressions = vec![];
                 self.advance_position();
-                loop {
-                    expressions.push(self.parse_expression()?);
-                    if Token::Comma.eq(self.current_token()) {
-                        self.advance_position();
-                        continue;
-                    } else {
-                        break;
+                if Token::ne(self.current_token(), &Token::RightBracket) {
+                    loop {
+                        expressions.push(self.parse_expression()?);
+                        if Token::eq(self.current_token(), &Token::Comma) {
+                            self.advance_position();
+                            continue;
+                        } else {
+                            break;
+                        }
                     }
                 }
                 self.expect_token(Token::RightBracket)?;

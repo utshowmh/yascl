@@ -50,6 +50,17 @@ impl fmt::Display for Object {
 }
 
 impl Object {
+    pub fn equal(&self, other: &Object) -> bool {
+        match (self, other) {
+            (Object::Null, Object::Null) => true,
+            (Object::Boolean(x), Object::Boolean(y)) => x == y,
+            (Object::Integer(x), Object::Integer(y)) => x == y,
+            (Object::Float(x), Object::Float(y)) => x == y,
+            (Object::String(x), Object::String(y)) => x == y,
+            _ => false,
+        }
+    }
+
     pub fn is_truthy(&self) -> bool {
         match self {
             Object::Null => false,
