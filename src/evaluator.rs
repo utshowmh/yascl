@@ -45,11 +45,10 @@ fn evaluate_statement(
                 .set(name.to_owned(), value.to_owned());
             Ok(value)
         }
-        Statement::Return(Some(expression)) => {
+        Statement::Return(expression) => {
             let value = evaluate_expression(expression, Rc::clone(&environment))?;
             Ok(Object::Return(Box::new(value)))
         }
-        Statement::Return(None) => Ok(Object::Return(Box::new(Object::Null))),
         Statement::Expression(expression) => {
             evaluate_expression(expression, Rc::clone(&environment))
         }

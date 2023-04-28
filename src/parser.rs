@@ -96,7 +96,6 @@ impl Parser {
             self.advance_position();
             self.expect_token(Token::Assign)?;
             let value = self.parse_expression()?;
-            self.expect_token(Token::Semicolon)?;
             Ok(Statement::Let(identifier, value))
         } else {
             Err(Error::Parser(format!(
@@ -108,19 +107,12 @@ impl Parser {
 
     fn parse_return_statement(&mut self) -> Result<Statement, Error> {
         self.expect_token(Token::Return)?;
-        if Token::Semicolon.eq(self.current_token()) {
-            self.advance_position();
-            Ok(Statement::Return(None))
-        } else {
-            let value = self.parse_expression()?;
-            self.expect_token(Token::Semicolon)?;
-            Ok(Statement::Return(Some(value)))
-        }
+        let value = self.parse_expression()?;
+        Ok(Statement::Return(value))
     }
 
     fn parse_expression_statement(&mut self) -> Result<Statement, Error> {
         let value = self.parse_expression()?;
-        self.expect_token(Token::Semicolon)?;
         Ok(Statement::Expression(value))
     }
 

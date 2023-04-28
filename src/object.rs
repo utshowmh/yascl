@@ -42,7 +42,7 @@ impl fmt::Display for Object {
             }
             Object::Return(value) => write!(f, "{}", *value),
             Object::Function(params, body, _) => {
-                write!(f, "function({}) {}", params.join(","), body)
+                write!(f, "function({}) {}", params.join(", "), body)
             }
             Object::Builtin(_) => write!(f, "builtin function"),
         }

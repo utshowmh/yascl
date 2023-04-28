@@ -24,7 +24,6 @@ pub enum Token {
 
     Comma,
     Colon,
-    Semicolon,
 
     LeftParen,
     RightParen,
@@ -67,7 +66,6 @@ impl Display for Token {
 
             Token::Comma => write!(f, ","),
             Token::Colon => write!(f, ":"),
-            Token::Semicolon => write!(f, ";"),
 
             Token::LeftParen => write!(f, "("),
             Token::RightParen => write!(f, ")"),

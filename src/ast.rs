@@ -23,32 +23,23 @@ pub struct BlockStatement {
 
 impl Display for BlockStatement {
     fn fmt(&self, f: &mut Formatter<'_>) -> Result {
-        if self.statements.is_empty() {
-            write!(f, "{{ }}")
-        } else {
-            writeln!(f, "{{")?;
-            for statement in &self.statements {
-                writeln!(f, "\t{statement}")?;
-            }
-            write!(f, "}}")
-        }
+        write!(f, "{{ ... }}")
     }
 }
 
 #[derive(Debug, Clone)]
 pub enum Statement {
     Let(String, Expression),
-    Return(Option<Expression>),
+    Return(Expression),
     Expression(Expression),
 }
 
 impl Display for Statement {
     fn fmt(&self, f: &mut Formatter<'_>) -> Result {
         match self {
-            Statement::Let(identifier, value) => write!(f, "let {identifier} = {value};"),
-            Statement::Return(None) => write!(f, "return;"),
-            Statement::Return(Some(value)) => write!(f, "return {value};"),
-            Statement::Expression(value) => write!(f, "{value};"),
+            Statement::Let(identifier, value) => write!(f, "let {identifier} = {value}"),
+            Statement::Return(value) => write!(f, "return {value}"),
+            Statement::Expression(value) => write!(f, "{value}"),
         }
     }
 }

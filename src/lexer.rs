@@ -68,7 +68,6 @@ impl Lexer {
             '>' => token = Token::Greater,
             ',' => token = Token::Comma,
             ':' => token = Token::Colon,
-            ';' => token = Token::Semicolon,
             '(' => token = Token::LeftParen,
             ')' => token = Token::RightParen,
             '{' => token = Token::LeftBrace,
