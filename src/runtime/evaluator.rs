@@ -104,16 +104,32 @@ fn evaluate_expression(
             let index = evaluate_expression(index, Rc::clone(&environment))?;
             match (object, index) {
                 (Object::Array(array), Object::Integer(index)) => {
-                    Ok(array[index as usize].to_owned()) // FIXME: Handle index out of bound.
+                    let last_index = array.len() as i64 - 1;
+                    if index >= 0 && index <= last_index {
+                        Ok(array[index as usize].to_owned())
+                    } else {
+                        Err(Error::Runtime(format!("Index '{index}' not valid")))
+                    }
                 }
                 (Object::Array(array), Object::Range(from, to)) => {
-                    Ok(Object::Array(
-                        array[from as usize..(to + 1) as usize].to_vec(),
-                    ))
-                    // FIXME: Handle index out of bound.
+                    let last_index = array.len() as i64 - 1;
+                    if from >= 0 && from <= last_index && to >= 0 && to <= last_index {
+                        Ok(Object::Array(
+                            array[from as usize..(to + 1) as usize].to_vec(),
+                        ))
+                    } else {
+                        Err(Error::Runtime(format!(
+                            "Index '{}' not valid",
+                            Object::Range(from, to)
+                        )))
+                    }
                 }
                 (Object::Hash(pairs), Object::String(key)) => {
-                    Ok(pairs.get(&key).unwrap().to_owned()) // FIXME: Why unwrap?
+                    if let Some(object) = pairs.get(&key) {
+                        Ok(object.to_owned())
+                    } else {
+                        Err(Error::Runtime(format!("Key '{key}' not valid",)))
+                    }
                 }
                 (object, index) => Err(Error::Runtime(format!(
                     "Object '{object}' is not indexable with '{index}'"
