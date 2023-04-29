@@ -17,10 +17,17 @@ pub enum Token {
     Slash,
 
     Lesser,
+    LesserOrEqual,
     Greater,
+    GreaterOrEqual,
 
     Equal,
     NotEqual,
+
+    BitwiseAnd,
+    LogicalAnd,
+    BitwiseOr,
+    LogicalOr,
 
     Comma,
     Colon,
@@ -59,10 +66,17 @@ impl fmt::Display for Token {
             Token::Slash => write!(f, "/"),
 
             Token::Lesser => write!(f, "<"),
+            Token::LesserOrEqual => write!(f, "<="),
             Token::Greater => write!(f, ">"),
+            Token::GreaterOrEqual => write!(f, ">="),
 
             Token::Equal => write!(f, "=="),
             Token::NotEqual => write!(f, "!="),
+
+            Token::BitwiseAnd => write!(f, "&"),
+            Token::LogicalAnd => write!(f, "&&"),
+            Token::BitwiseOr => write!(f, "|"),
+            Token::LogicalOr => write!(f, "||"),
 
             Token::Comma => write!(f, ","),
             Token::Colon => write!(f, ":"),

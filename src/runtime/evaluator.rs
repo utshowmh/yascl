@@ -156,20 +156,44 @@ fn evaluate_expression(
                 (Object::Float(left), Token::Slash, Object::Float(right)) => {
                     Ok(Object::Float(left / right))
                 }
-                (Object::Integer(left), Token::Greater, Object::Integer(right)) => {
-                    Ok(Object::Boolean(left > right))
-                }
-                (Object::Float(left), Token::Greater, Object::Float(right)) => {
-                    Ok(Object::Boolean(left > right))
-                }
                 (Object::Integer(left), Token::Lesser, Object::Integer(right)) => {
                     Ok(Object::Boolean(left < right))
                 }
                 (Object::Float(left), Token::Lesser, Object::Float(right)) => {
                     Ok(Object::Boolean(left < right))
                 }
+                (Object::Integer(left), Token::LesserOrEqual, Object::Integer(right)) => {
+                    Ok(Object::Boolean(left <= right))
+                }
+                (Object::Float(left), Token::LesserOrEqual, Object::Float(right)) => {
+                    Ok(Object::Boolean(left <= right))
+                }
+                (Object::Integer(left), Token::Greater, Object::Integer(right)) => {
+                    Ok(Object::Boolean(left > right))
+                }
+                (Object::Float(left), Token::Greater, Object::Float(right)) => {
+                    Ok(Object::Boolean(left > right))
+                }
+                (Object::Integer(left), Token::GreaterOrEqual, Object::Integer(right)) => {
+                    Ok(Object::Boolean(left >= right))
+                }
+                (Object::Float(left), Token::GreaterOrEqual, Object::Float(right)) => {
+                    Ok(Object::Boolean(left >= right))
+                }
+                (Object::Integer(left), Token::BitwiseAnd, Object::Integer(right)) => {
+                    Ok(Object::Integer(left & right))
+                }
+                (Object::Integer(left), Token::BitwiseOr, Object::Integer(right)) => {
+                    Ok(Object::Integer(left | right))
+                }
                 (left, Token::Equal, right) => Ok(Object::Boolean(left.equal(&right))),
                 (left, Token::NotEqual, right) => Ok(Object::Boolean(!left.equal(&right))),
+                (left, Token::LogicalAnd, right) => {
+                    Ok(Object::Boolean(left.is_truthy() && right.is_truthy()))
+                }
+                (left, Token::LogicalOr, right) => {
+                    Ok(Object::Boolean(left.is_truthy() || right.is_truthy()))
+                }
                 (left, operator, right) => Err(Error::Runtime(format!(
                     "Operator '{operator}' is not defined for '{left}' and '{right}'"
                 ))),

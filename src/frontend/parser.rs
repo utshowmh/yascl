@@ -23,53 +23,8 @@ impl Parser {
         let mut statements = vec![];
         while !self.end_of_tokens() {
             statements.push(self.parse_statement()?);
-            self.advance_position();
         }
         Ok(Program { statements })
-    }
-
-    fn peek(&self, offset: usize) -> &Token {
-        let index = self.position + offset;
-        if index < self.tokens.len() {
-            &self.tokens[index]
-        } else {
-            &Token::Eof
-        }
-    }
-
-    fn current_token(&self) -> &Token {
-        self.peek(0)
-    }
-
-    fn end_of_tokens(&self) -> bool {
-        Token::Eof.eq(self.current_token())
-    }
-
-    fn advance_position(&mut self) {
-        self.position += 1;
-    }
-
-    fn next_token(&mut self) -> Token {
-        let token = self.current_token().to_owned();
-        self.advance_position();
-        token
-    }
-
-    fn current_token_in(&self, tokens: &[Token]) -> bool {
-        tokens.contains(self.current_token())
-    }
-
-    fn expect_token(&mut self, expected: Token) -> Result<(), Error> {
-        if expected.eq(self.current_token()) {
-            self.advance_position();
-            Ok(())
-        } else {
-            Err(Error::Parser(format!(
-                "Unexpected token '{}', expected '{}'",
-                self.current_token(),
-                expected
-            )))
-        }
     }
 
     fn parse_block_statement(&mut self) -> Result<BlockStatement, Error> {
@@ -121,7 +76,47 @@ impl Parser {
     }
 
     fn parse_infix_expression(&mut self) -> Result<Expression, Error> {
-        self.parse_equality_expression()
+        self.parse_logical_or_expression()
+    }
+
+    fn parse_logical_or_expression(&mut self) -> Result<Expression, Error> {
+        let mut left = self.parse_logical_and_expression()?;
+        while Token::eq(self.current_token(), &Token::LogicalOr) {
+            let operator = self.next_token();
+            let right = self.parse_logical_and_expression()?;
+            left = Expression::Infix(Box::new(left), operator, Box::new(right));
+        }
+        Ok(left)
+    }
+
+    fn parse_logical_and_expression(&mut self) -> Result<Expression, Error> {
+        let mut left = self.parse_bitwise_or_expression()?;
+        while Token::eq(self.current_token(), &Token::LogicalAnd) {
+            let operator = self.next_token();
+            let right = self.parse_bitwise_or_expression()?;
+            left = Expression::Infix(Box::new(left), operator, Box::new(right));
+        }
+        Ok(left)
+    }
+
+    fn parse_bitwise_or_expression(&mut self) -> Result<Expression, Error> {
+        let mut left = self.parse_bitwise_and_expression()?;
+        while Token::eq(self.current_token(), &Token::BitwiseOr) {
+            let operator = self.next_token();
+            let right = self.parse_bitwise_and_expression()?;
+            left = Expression::Infix(Box::new(left), operator, Box::new(right));
+        }
+        Ok(left)
+    }
+
+    fn parse_bitwise_and_expression(&mut self) -> Result<Expression, Error> {
+        let mut left = self.parse_equality_expression()?;
+        while Token::eq(self.current_token(), &Token::BitwiseAnd) {
+            let operator = self.next_token();
+            let right = self.parse_equality_expression()?;
+            left = Expression::Infix(Box::new(left), operator, Box::new(right));
+        }
+        Ok(left)
     }
 
     fn parse_equality_expression(&mut self) -> Result<Expression, Error> {
@@ -136,7 +131,12 @@ impl Parser {
 
     fn parse_comparison_expression(&mut self) -> Result<Expression, Error> {
         let mut left = self.parse_term_expression()?;
-        while self.current_token_in(&[Token::Lesser, Token::Greater]) {
+        while self.current_token_in(&[
+            Token::Lesser,
+            Token::LesserOrEqual,
+            Token::Greater,
+            Token::GreaterOrEqual,
+        ]) {
             let operator = self.next_token();
             let right = self.parse_term_expression()?;
             left = Expression::Infix(Box::new(left), operator, Box::new(right));
@@ -322,6 +322,50 @@ impl Parser {
                     )))
                 }
             }
+        }
+    }
+
+    fn peek(&self, offset: usize) -> &Token {
+        let index = self.position + offset;
+        if index < self.tokens.len() {
+            &self.tokens[index]
+        } else {
+            &Token::Eof
+        }
+    }
+
+    fn current_token(&self) -> &Token {
+        self.peek(0)
+    }
+
+    fn end_of_tokens(&self) -> bool {
+        Token::Eof.eq(self.current_token())
+    }
+
+    fn advance_position(&mut self) {
+        self.position += 1;
+    }
+
+    fn next_token(&mut self) -> Token {
+        let token = self.current_token().to_owned();
+        self.advance_position();
+        token
+    }
+
+    fn current_token_in(&self, tokens: &[Token]) -> bool {
+        tokens.contains(self.current_token())
+    }
+
+    fn expect_token(&mut self, expected: Token) -> Result<(), Error> {
+        if expected.eq(self.current_token()) {
+            self.advance_position();
+            Ok(())
+        } else {
+            Err(Error::Parser(format!(
+                "Unexpected token '{}', expected '{}'",
+                self.current_token(),
+                expected
+            )))
         }
     }
 }

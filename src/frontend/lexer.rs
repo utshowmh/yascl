@@ -64,8 +64,38 @@ impl Lexer {
             }
             '*' => token = Token::Asterisk,
             '/' => token = Token::Slash,
-            '<' => token = Token::Lesser,
-            '>' => token = Token::Greater,
+            '<' => {
+                if self.peek_char() == '=' {
+                    self.read_next_character();
+                    token = Token::LesserOrEqual
+                } else {
+                    token = Token::Lesser
+                }
+            }
+            '>' => {
+                if self.peek_char() == '=' {
+                    self.read_next_character();
+                    token = Token::GreaterOrEqual
+                } else {
+                    token = Token::Greater
+                }
+            }
+            '&' => {
+                if self.peek_char() == '&' {
+                    self.read_next_character();
+                    token = Token::LogicalAnd
+                } else {
+                    token = Token::BitwiseAnd
+                }
+            }
+            '|' => {
+                if self.peek_char() == '|' {
+                    self.read_next_character();
+                    token = Token::LogicalOr
+                } else {
+                    token = Token::BitwiseOr
+                }
+            }
             ',' => token = Token::Comma,
             ':' => token = Token::Colon,
             '(' => token = Token::LeftParen,
