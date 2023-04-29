@@ -1,24 +1,24 @@
 use std::fmt::{Display, Formatter, Result};
 
-use crate::token::Token;
+use super::token::Token;
 
-#[derive(Debug)]
-pub struct Program {
-    pub statements: Vec<Statement>,
+#[derive(Debug, Default)]
+pub(crate) struct Program {
+    pub(crate) statements: Vec<Statement>,
 }
 
 impl Display for Program {
     fn fmt(&self, f: &mut Formatter<'_>) -> Result {
         for statement in &self.statements {
-            writeln!(f, "{statement}")?;
+            write!(f, "{statement}")?;
         }
         Ok(())
     }
 }
 
 #[derive(Debug, Clone)]
-pub struct BlockStatement {
-    pub statements: Vec<Statement>,
+pub(crate) struct BlockStatement {
+    pub(crate) statements: Vec<Statement>,
 }
 
 impl Display for BlockStatement {
@@ -28,7 +28,7 @@ impl Display for BlockStatement {
 }
 
 #[derive(Debug, Clone)]
-pub enum Statement {
+pub(crate) enum Statement {
     Let(String, Expression),
     Return(Expression),
     Expression(Expression),
@@ -37,15 +37,15 @@ pub enum Statement {
 impl Display for Statement {
     fn fmt(&self, f: &mut Formatter<'_>) -> Result {
         match self {
-            Statement::Let(identifier, value) => write!(f, "let {identifier} = {value}"),
-            Statement::Return(value) => write!(f, "return {value}"),
-            Statement::Expression(value) => write!(f, "{value}"),
+            Statement::Let(identifier, value) => writeln!(f, "let {identifier} = {value}"),
+            Statement::Return(value) => writeln!(f, "return {value}"),
+            Statement::Expression(value) => writeln!(f, "{value}"),
         }
     }
 }
 
 #[derive(Debug, Clone)]
-pub enum Expression {
+pub(crate) enum Expression {
     Identifier(String),
     Integer(i64),
     Float(f64),
@@ -64,7 +64,7 @@ pub enum Expression {
 impl Display for Expression {
     fn fmt(&self, f: &mut Formatter<'_>) -> Result {
         match self {
-            Expression::Identifier(identifier) => write!(f, "{identifier}"),
+            Expression::Identifier(name) => write!(f, "{name}"),
             Expression::Integer(value) => write!(f, "{value}"),
             Expression::Float(value) => write!(f, "{value}"),
             Expression::String(value) => write!(f, "{value}"),
@@ -82,7 +82,7 @@ impl Display for Expression {
                 Ok(())
             }
             Expression::Function(parameters, body) => {
-                write!(f, "fun({}) {body}", parameters.join(","))
+                write!(f, "fun({}) {body}", parameters.join(", "))
             }
             Expression::Call(function, arguments) => {
                 write!(f, "{function}({})", comma_separated_values(arguments))
@@ -96,7 +96,7 @@ fn comma_separated_values(values: &[Expression]) -> String {
         .iter()
         .map(|value| value.to_string())
         .collect::<Vec<String>>()
-        .join(",")
+        .join(", ")
 }
 
 fn comma_separated_pairs(pairs: &[(Expression, Expression)]) -> String {
@@ -104,5 +104,5 @@ fn comma_separated_pairs(pairs: &[(Expression, Expression)]) -> String {
         .iter()
         .map(|pair| format!("{}: {}", pair.0, pair.1))
         .collect::<Vec<String>>()
-        .join(",")
+        .join(", ")
 }

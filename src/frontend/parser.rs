@@ -1,25 +1,25 @@
 use std::vec;
 
-use crate::{
+use crate::common::{
     ast::{BlockStatement, Expression, Program, Statement},
     error::Error,
     token::Token,
 };
 
-pub struct Parser {
+pub(crate) struct Parser {
     tokens: Vec<Token>,
     position: usize,
 }
 
 impl Parser {
-    pub fn new(tokens: Vec<Token>) -> Parser {
+    pub(crate) fn new(tokens: Vec<Token>) -> Parser {
         Parser {
             tokens,
             position: 0,
         }
     }
 
-    pub fn parse_program(&mut self) -> Result<Program, Error> {
+    pub(crate) fn parse_program(&mut self) -> Result<Program, Error> {
         let mut statements = vec![];
         while !self.end_of_tokens() {
             statements.push(self.parse_statement()?);

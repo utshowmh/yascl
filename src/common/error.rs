@@ -1,12 +1,12 @@
 #[derive(Debug)]
-pub enum Error {
+pub(crate) enum Error {
     Lexer(String),
     Parser(String),
     Runtime(String),
 }
 
 impl Error {
-    pub fn report(&self) {
+    pub(crate) fn report(&self) {
         match self {
             Error::Lexer(message) => {
                 eprintln!("LexerError: {message}.");

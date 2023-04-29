@@ -5,11 +5,12 @@ use std::{
 };
 
 use crate::{
-    ast::Program, builtin::get_builtin, environment::Environment, evaluator::evaluate,
-    lexer::Lexer, parser::Parser,
+    common::ast::Program,
+    frontend::{lexer::Lexer, parser::Parser},
+    runtime::{builtin::get_builtin, environment::Environment, evaluator::evaluate},
 };
 
-pub fn repl() {
+pub fn run() {
     let mut environment = Rc::new(RefCell::new(get_builtin()));
 
     loop {
@@ -18,14 +19,12 @@ pub fn repl() {
         let mut lexer = Lexer::new(source);
         let tokens = lexer.lex().unwrap_or_else(|err| {
             err.report();
-            Vec::new()
+            Vec::default()
         });
         let mut parser = Parser::new(tokens);
         let program = parser.parse_program().unwrap_or_else(|err| {
             err.report();
-            Program {
-                statements: Vec::new(),
-            }
+            Program::default()
         });
         match evaluate(&program, Rc::clone(&environment)) {
             Ok(object) => println!("{object}"),

@@ -1,11 +1,11 @@
 use std::{iter::Peekable, str::Chars};
 
-use crate::{
+use crate::common::{
     error::Error,
     token::{lookup_identifier, Token},
 };
 
-pub struct Lexer {
+pub(crate) struct Lexer {
     source: String,
     position: usize,
     character: char,
@@ -13,7 +13,7 @@ pub struct Lexer {
 }
 
 impl Lexer {
-    pub fn new(source: String) -> Lexer {
+    pub(crate) fn new(source: String) -> Lexer {
         let chars = unsafe { std::mem::transmute(source.chars().peekable()) };
         let mut lexer = Lexer {
             source,
@@ -25,7 +25,7 @@ impl Lexer {
         lexer
     }
 
-    pub fn lex(&mut self) -> Result<Vec<Token>, Error> {
+    pub(crate) fn lex(&mut self) -> Result<Vec<Token>, Error> {
         let mut tokens = vec![];
         let mut end_of_file = false;
         while !end_of_file {

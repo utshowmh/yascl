@@ -1,9 +1,11 @@
 use std::{cell::RefCell, collections::HashMap, fmt, rc::Rc};
 
-use crate::{ast::BlockStatement, environment::Environment, error::Error};
+use crate::runtime::environment::Environment;
+
+use super::{ast::BlockStatement, error::Error};
 
 #[derive(Debug, Clone)]
-pub enum Object {
+pub(crate) enum Object {
     Null,
     Boolean(bool),
     Integer(i64),
@@ -23,7 +25,7 @@ impl fmt::Display for Object {
             Object::Boolean(value) => write!(f, "{value}"),
             Object::Integer(value) => write!(f, "{value}"),
             Object::Float(value) => write!(f, "{value}"),
-            Object::String(value) => write!(f, "\"{value}\""),
+            Object::String(value) => write!(f, "{value}"),
             Object::Array(values) => {
                 let values = values
                     .iter()
@@ -33,24 +35,23 @@ impl fmt::Display for Object {
                 write!(f, "[{values}]")
             }
             Object::Hash(pairs) => {
-                let mut pairs = pairs
+                let pairs = pairs
                     .iter()
                     .map(|(k, v)| format!("{k}: {v}"))
                     .collect::<Vec<String>>();
-                pairs.sort();
                 write!(f, "{{{}}}", pairs.join(", "))
             }
             Object::Return(value) => write!(f, "{}", *value),
             Object::Function(params, body, _) => {
-                write!(f, "function({}) {}", params.join(", "), body)
+                write!(f, "<function({}) {}>", params.join(", "), body)
             }
-            Object::Builtin(_) => write!(f, "builtin function"),
+            Object::Builtin(_) => write!(f, "<builtin function>"),
         }
     }
 }
 
 impl Object {
-    pub fn equal(&self, other: &Object) -> bool {
+    pub(crate) fn equal(&self, other: &Object) -> bool {
         match (self, other) {
             (Object::Null, Object::Null) => true,
             (Object::Boolean(x), Object::Boolean(y)) => x == y,
@@ -61,7 +62,7 @@ impl Object {
         }
     }
 
-    pub fn is_truthy(&self) -> bool {
+    pub(crate) fn is_truthy(&self) -> bool {
         match self {
             Object::Null => false,
             Object::Boolean(bool) => *bool,
@@ -70,4 +71,4 @@ impl Object {
     }
 }
 
-pub type BuiltinFunction = fn(Vec<Object>) -> Result<Object, Error>;
+pub(crate) type BuiltinFunction = fn(Vec<Object>) -> Result<Object, Error>;

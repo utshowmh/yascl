@@ -1,14 +1,18 @@
 use std::{cell::RefCell, collections::HashMap, rc::Rc};
 
-use crate::{
+use crate::common::{
     ast::{BlockStatement, Expression, Program, Statement},
-    environment::Environment,
     error::Error,
     object::Object,
     token::Token,
 };
 
-pub fn evaluate(program: &Program, environment: Rc<RefCell<Environment>>) -> Result<Object, Error> {
+use super::environment::Environment;
+
+pub(crate) fn evaluate(
+    program: &Program,
+    environment: Rc<RefCell<Environment>>,
+) -> Result<Object, Error> {
     let mut value = Object::Null;
     for statement in &program.statements {
         value = evaluate_statement(statement, Rc::clone(&environment))?;
@@ -190,18 +194,18 @@ fn evaluate_expression(
         )),
         Expression::Call(callee, arguments) => {
             let callee = evaluate_expression(callee, Rc::clone(&environment))?;
-            let mut args = vec![];
+            let mut _argumets = vec![];
             for argument in arguments {
                 let argument = evaluate_expression(argument, Rc::clone(&environment))?;
-                args.push(argument);
+                _argumets.push(argument);
             }
             match callee {
                 Object::Function(parameters, body, environment) => {
-                    if parameters.len() != args.len() {
+                    if parameters.len() != _argumets.len() {
                         Err(Error::Runtime(format!(
-                            "Expected {} arguments, got {}",
+                            "Expected {} argument(s), got {}",
                             parameters.len(),
-                            args.len()
+                            _argumets.len()
                         )))
                     } else {
                         let local_environment =
@@ -209,12 +213,12 @@ fn evaluate_expression(
                         for i in 0..parameters.len() {
                             local_environment
                                 .borrow_mut()
-                                .set(parameters[i].to_owned(), args[i].to_owned());
+                                .set(parameters[i].to_owned(), _argumets[i].to_owned());
                         }
                         evaluate_block_statement(&body, local_environment)
                     }
                 }
-                Object::Builtin(func) => func(args),
+                Object::Builtin(func) => func(_argumets),
                 object => Err(Error::Runtime(format!("Object '{object}' is not callable"))),
             }
         }

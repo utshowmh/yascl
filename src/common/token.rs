@@ -1,4 +1,4 @@
-use std::fmt::{Display, Formatter, Result};
+use std::fmt;
 
 #[derive(Debug, PartialEq, Clone)]
 pub enum Token {
@@ -41,8 +41,8 @@ pub enum Token {
     False,
 }
 
-impl Display for Token {
-    fn fmt(&self, f: &mut Formatter<'_>) -> Result {
+impl fmt::Display for Token {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         match self {
             Token::Eof => write!(f, "EndOfFile"),
 
