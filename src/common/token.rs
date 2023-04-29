@@ -10,6 +10,9 @@ pub enum Token {
     String(String),
 
     Assign,
+
+    Spread,
+
     Plus,
     Minus,
     Bang,
@@ -31,6 +34,7 @@ pub enum Token {
 
     Comma,
     Colon,
+    Dot,
 
     LeftParen,
     RightParen,
@@ -59,6 +63,8 @@ impl fmt::Display for Token {
             Token::String(s) => write!(f, "\"{s}\""),
 
             Token::Assign => write!(f, "="),
+
+            Token::Spread => write!(f, ".."),
             Token::Plus => write!(f, "+"),
             Token::Minus => write!(f, "-"),
             Token::Bang => write!(f, "!"),
@@ -80,6 +86,7 @@ impl fmt::Display for Token {
 
             Token::Comma => write!(f, ","),
             Token::Colon => write!(f, ":"),
+            Token::Dot => write!(f, "."),
 
             Token::LeftParen => write!(f, "("),
             Token::RightParen => write!(f, ")"),

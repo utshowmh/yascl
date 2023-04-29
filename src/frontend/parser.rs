@@ -130,13 +130,23 @@ impl Parser {
     }
 
     fn parse_comparison_expression(&mut self) -> Result<Expression, Error> {
-        let mut left = self.parse_term_expression()?;
+        let mut left = self.parse_spread_expression()?;
         while self.current_token_in(&[
             Token::Lesser,
             Token::LesserOrEqual,
             Token::Greater,
             Token::GreaterOrEqual,
         ]) {
+            let operator = self.next_token();
+            let right = self.parse_spread_expression()?;
+            left = Expression::Infix(Box::new(left), operator, Box::new(right));
+        }
+        Ok(left)
+    }
+
+    fn parse_spread_expression(&mut self) -> Result<Expression, Error> {
+        let mut left = self.parse_term_expression()?;
+        while Token::eq(self.current_token(), &Token::Spread) {
             let operator = self.next_token();
             let right = self.parse_term_expression()?;
             left = Expression::Infix(Box::new(left), operator, Box::new(right));

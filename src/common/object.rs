@@ -11,6 +11,7 @@ pub(crate) enum Object {
     Integer(i64),
     Float(f64),
     String(String),
+    Range(i64, i64),
     Array(Vec<Object>),
     Hash(HashMap<String, Object>),
     Return(Box<Object>),
@@ -26,6 +27,7 @@ impl fmt::Display for Object {
             Object::Integer(value) => write!(f, "{value}"),
             Object::Float(value) => write!(f, "{value}"),
             Object::String(value) => write!(f, "{value}"),
+            Object::Range(from, to) => write!(f, "{from}..{to}"),
             Object::Array(values) => {
                 let values = values
                     .iter()

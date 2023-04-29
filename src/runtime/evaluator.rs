@@ -106,6 +106,12 @@ fn evaluate_expression(
                 (Object::Array(array), Object::Integer(index)) => {
                     Ok(array[index as usize].to_owned()) // FIXME: Handle index out of bound.
                 }
+                (Object::Array(array), Object::Range(from, to)) => {
+                    Ok(Object::Array(
+                        array[from as usize..(to + 1) as usize].to_vec(),
+                    ))
+                    // FIXME: Handle index out of bound.
+                }
                 (Object::Hash(pairs), Object::String(key)) => {
                     Ok(pairs.get(&key).unwrap().to_owned()) // FIXME: Why unwrap?
                 }
@@ -129,6 +135,9 @@ fn evaluate_expression(
             let left = evaluate_expression(left, Rc::clone(&environment))?;
             let right = evaluate_expression(right, Rc::clone(&environment))?;
             match (left, operator, right) {
+                (Object::Integer(from), Token::Spread, Object::Integer(to)) => {
+                    Ok(Object::Range(from, to))
+                }
                 (Object::Integer(left), Token::Plus, Object::Integer(right)) => {
                     Ok(Object::Integer(left + right))
                 }

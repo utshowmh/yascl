@@ -52,6 +52,14 @@ impl Lexer {
                     token = Token::Assign
                 }
             }
+            '.' => {
+                if self.peek_char() == '.' {
+                    self.read_next_character();
+                    token = Token::Spread
+                } else {
+                    token = Token::Dot
+                }
+            }
             '+' => token = Token::Plus,
             '-' => token = Token::Minus,
             '!' => {
