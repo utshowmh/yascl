@@ -15,7 +15,7 @@ pub fn run() {
 
     loop {
         environment = Rc::new(RefCell::new(Environment::extend(environment)));
-        let source = ask_for_input("yascl => ");
+        let source = ask_for_input("=> ");
         let mut lexer = Lexer::new(source);
         let tokens = lexer.lex().unwrap_or_else(|err| {
             err.report();
@@ -37,8 +37,15 @@ fn ask_for_input(prompt: &str) -> String {
     let mut source = String::new();
     print!("{prompt}");
     stdout().flush().expect("Failed to flush stdout.");
-    stdin()
-        .read_line(&mut source)
-        .expect("Failed to read from stdin.");
+    for line in stdin().lines() {
+        let line = line.expect("Failed to read from stdin.");
+        let line = line.trim();
+        if line.is_empty() {
+            break;
+        }
+        source.push_str(line);
+        print!(".. ");
+        stdout().flush().expect("Failed to flush stdout.");
+    }
     source
 }
