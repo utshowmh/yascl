@@ -1,5 +1,3 @@
-use std::vec;
-
 use crate::common::{
     ast::{BlockStatement, Expression, Program, Statement},
     error::Error,
@@ -185,7 +183,7 @@ impl Parser {
     }
 
     fn parse_call_expression(&mut self) -> Result<Expression, Error> {
-        let expression = self.parse_literal_expression()?;
+        let expression = self.parse_index_expression()?;
         match self.current_token() {
             Token::LeftParen => {
                 self.advance_position();
@@ -204,6 +202,13 @@ impl Parser {
                 self.expect_token(Token::RightParen)?;
                 Ok(Expression::Call(Box::new(expression), arguments))
             }
+            _ => Ok(expression),
+        }
+    }
+
+    fn parse_index_expression(&mut self) -> Result<Expression, Error> {
+        let expression = self.parse_literal_expression()?;
+        match self.current_token() {
             Token::LeftBracket => {
                 self.advance_position();
                 let index = self.parse_expression()?;

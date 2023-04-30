@@ -10,7 +10,7 @@ pub(crate) struct Program {
 impl Display for Program {
     fn fmt(&self, f: &mut Formatter<'_>) -> Result {
         for statement in &self.statements {
-            write!(f, "{statement}")?;
+            writeln!(f, "{statement}")?;
         }
         Ok(())
     }
@@ -37,9 +37,9 @@ pub(crate) enum Statement {
 impl Display for Statement {
     fn fmt(&self, f: &mut Formatter<'_>) -> Result {
         match self {
-            Statement::Let(identifier, value) => writeln!(f, "let {identifier} = {value}"),
-            Statement::Return(value) => writeln!(f, "return {value}"),
-            Statement::Expression(value) => writeln!(f, "{value}"),
+            Statement::Let(identifier, value) => write!(f, "let {identifier} = {value}"),
+            Statement::Return(value) => write!(f, "return {value}"),
+            Statement::Expression(value) => write!(f, "{value}"),
         }
     }
 }
@@ -64,28 +64,29 @@ pub(crate) enum Expression {
 impl Display for Expression {
     fn fmt(&self, f: &mut Formatter<'_>) -> Result {
         match self {
-            Expression::Identifier(name) => write!(f, "{name}"),
-            Expression::Integer(value) => write!(f, "{value}"),
-            Expression::Float(value) => write!(f, "{value}"),
-            Expression::String(value) => write!(f, "{value}"),
-            Expression::Boolean(value) => write!(f, "{value}"),
-            Expression::Array(values) => write!(f, "{}", comma_separated_values(values)),
-            Expression::Hash(pairs) => write!(f, "{}", comma_separated_pairs(pairs)),
+            Expression::Identifier(name) => write!(f, "({name})"),
+            Expression::Integer(value) => write!(f, "({value})"),
+            Expression::Float(value) => write!(f, "({value})"),
+            Expression::String(value) => write!(f, "({value})"),
+            Expression::Boolean(value) => write!(f, "({value})"),
+            Expression::Array(values) => write!(f, "([{}])", comma_separated_values(values)),
+            Expression::Hash(pairs) => write!(f, "({{{}}})", comma_separated_pairs(pairs)),
             Expression::Index(left, index) => write!(f, "({left}[{index}])"),
-            Expression::Prefix(operator, right) => write!(f, "{operator} {right}"),
-            Expression::Infix(left, operator, right) => write!(f, "{left} {operator} {right}"),
+            Expression::Prefix(operator, right) => write!(f, "({operator} {right})"),
+            Expression::Infix(left, operator, right) => write!(f, "({left} {operator} {right})"),
             Expression::If(condition, consequence, alternative) => {
-                write!(f, "if {condition} {consequence}")?;
+                write!(f, "(if {condition} {consequence}")?;
                 if let Some(alternative) = alternative {
-                    write!(f, "else {alternative}")?;
+                    write!(f, "else {alternative})")
+                } else {
+                    write!(f, ")")
                 }
-                Ok(())
             }
             Expression::Function(parameters, body) => {
-                write!(f, "fun({}) {body}", parameters.join(", "))
+                write!(f, "(fun({}) {body})", parameters.join(", "))
             }
             Expression::Call(function, arguments) => {
-                write!(f, "{function}({})", comma_separated_values(arguments))
+                write!(f, "({function}({}))", comma_separated_values(arguments))
             }
         }
     }
