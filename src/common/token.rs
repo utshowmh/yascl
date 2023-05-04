@@ -1,7 +1,7 @@
 use std::fmt;
 
 #[derive(Debug, PartialEq, Clone)]
-pub enum Token {
+pub(crate) enum Token {
     Eof,
 
     Identifier(String),
@@ -106,7 +106,7 @@ impl fmt::Display for Token {
     }
 }
 
-pub fn lookup_identifier(identifier: &str) -> Token {
+pub(crate) fn lookup_identifier(identifier: &str) -> Token {
     match identifier {
         "let" => Token::Let,
         "fun" => Token::Function,

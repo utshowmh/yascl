@@ -1,5 +1,6 @@
 use std::{
     cell::RefCell,
+    env::var,
     io::{stdin, stdout, Write},
     rc::Rc,
 };
@@ -11,6 +12,8 @@ use crate::{
 };
 
 pub fn run() {
+    let username = var("LOGNAME").unwrap_or("anonymous".to_string());
+    println!("Hello, {username}! Welcome to YASCL REPL.");
     let mut environment = Rc::new(RefCell::new(get_builtin()));
 
     loop {

@@ -10,6 +10,14 @@ fn exit(objects: Vec<Object>) -> Result<Object, Error> {
     std::process::exit(exit_code)
 }
 
+fn write(objects: Vec<Object>) -> Result<Object, Error> {
+    for object in objects {
+        print!("{object}");
+    }
+    println!();
+    Ok(Object::Null)
+}
+
 fn len(objects: Vec<Object>) -> Result<Object, Error> {
     let object = match objects.get(0) {
         Some(Object::Array(array)) => Object::Integer(array.len() as i64),
@@ -59,6 +67,7 @@ fn append(objects: Vec<Object>) -> Result<Object, Error> {
 pub(crate) fn get_builtin() -> Environment {
     let mut environment = Environment::new();
     environment.set("exit".to_string(), Object::Builtin(exit));
+    environment.set("write".to_string(), Object::Builtin(write));
     environment.set("len".to_string(), Object::Builtin(len));
     environment.set("first".to_string(), Object::Builtin(first));
     environment.set("rest".to_string(), Object::Builtin(rest));

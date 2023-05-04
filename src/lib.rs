@@ -3,3 +3,4 @@ mod frontend;
 mod runtime;
 
 pub mod repl;
+pub mod script;
