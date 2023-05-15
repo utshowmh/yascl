@@ -207,16 +207,14 @@ impl Parser {
     }
 
     fn parse_index_expression(&mut self) -> Result<Expression, Error> {
-        let expression = self.parse_literal_expression()?;
-        match self.current_token() {
-            Token::LeftBracket => {
-                self.advance_position();
-                let index = self.parse_expression()?;
-                self.expect_token(Token::RightBracket)?;
-                Ok(Expression::Index(Box::new(expression), Box::new(index)))
-            }
-            _ => Ok(expression),
+        let mut expression = self.parse_literal_expression()?;
+        while Token::eq(&Token::LeftBracket, self.current_token()) {
+            self.advance_position();
+            let index = self.parse_expression()?;
+            self.expect_token(Token::RightBracket)?;
+            expression = Expression::Index(Box::new(expression), Box::new(index));
         }
+        Ok(expression)
     }
 
     fn parse_literal_expression(&mut self) -> Result<Expression, Error> {
@@ -224,7 +222,7 @@ impl Parser {
             Token::Pipe => {
                 self.advance_position();
                 let mut parameters = vec![];
-                if Token::ne(self.current_token(), &Token::RightParen) {
+                if Token::ne(self.current_token(), &Token::Pipe) {
                     loop {
                         if let Token::Identifier(identifier) = self.current_token().to_owned() {
                             self.advance_position();
