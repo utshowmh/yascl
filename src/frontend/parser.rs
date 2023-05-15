@@ -79,7 +79,7 @@ impl Parser {
 
     fn parse_logical_or_expression(&mut self) -> Result<Expression, Error> {
         let mut left = self.parse_logical_and_expression()?;
-        while Token::eq(self.current_token(), &Token::LogicalOr) {
+        while Token::eq(self.current_token(), &Token::PipePipe) {
             let operator = self.next_token();
             let right = self.parse_logical_and_expression()?;
             left = Expression::Infix(Box::new(left), operator, Box::new(right));
@@ -89,7 +89,7 @@ impl Parser {
 
     fn parse_logical_and_expression(&mut self) -> Result<Expression, Error> {
         let mut left = self.parse_bitwise_or_expression()?;
-        while Token::eq(self.current_token(), &Token::LogicalAnd) {
+        while Token::eq(self.current_token(), &Token::AmpersandAmpersand) {
             let operator = self.next_token();
             let right = self.parse_bitwise_or_expression()?;
             left = Expression::Infix(Box::new(left), operator, Box::new(right));
@@ -99,7 +99,7 @@ impl Parser {
 
     fn parse_bitwise_or_expression(&mut self) -> Result<Expression, Error> {
         let mut left = self.parse_bitwise_and_expression()?;
-        while Token::eq(self.current_token(), &Token::BitwiseOr) {
+        while Token::eq(self.current_token(), &Token::Pipe) {
             let operator = self.next_token();
             let right = self.parse_bitwise_and_expression()?;
             left = Expression::Infix(Box::new(left), operator, Box::new(right));
@@ -109,7 +109,7 @@ impl Parser {
 
     fn parse_bitwise_and_expression(&mut self) -> Result<Expression, Error> {
         let mut left = self.parse_equality_expression()?;
-        while Token::eq(self.current_token(), &Token::BitwiseAnd) {
+        while Token::eq(self.current_token(), &Token::Ampersand) {
             let operator = self.next_token();
             let right = self.parse_equality_expression()?;
             left = Expression::Infix(Box::new(left), operator, Box::new(right));
@@ -221,9 +221,8 @@ impl Parser {
 
     fn parse_literal_expression(&mut self) -> Result<Expression, Error> {
         match self.current_token().to_owned() {
-            Token::Function => {
+            Token::Pipe => {
                 self.advance_position();
-                self.expect_token(Token::LeftParen)?;
                 let mut parameters = vec![];
                 if Token::ne(self.current_token(), &Token::RightParen) {
                     loop {
@@ -244,7 +243,7 @@ impl Parser {
                         }
                     }
                 }
-                self.expect_token(Token::RightParen)?;
+                self.expect_token(Token::Pipe)?;
                 let body = self.parse_block_statement()?;
                 Ok(Expression::Function(parameters, body))
             }

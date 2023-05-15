@@ -91,17 +91,17 @@ impl Lexer {
             '&' => {
                 if self.peek_char() == '&' {
                     self.read_next_character();
-                    token = Token::LogicalAnd
+                    token = Token::AmpersandAmpersand
                 } else {
-                    token = Token::BitwiseAnd
+                    token = Token::Ampersand
                 }
             }
             '|' => {
                 if self.peek_char() == '|' {
                     self.read_next_character();
-                    token = Token::LogicalOr
+                    token = Token::PipePipe
                 } else {
-                    token = Token::BitwiseOr
+                    token = Token::Pipe
                 }
             }
             ',' => token = Token::Comma,

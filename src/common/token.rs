@@ -27,10 +27,10 @@ pub(crate) enum Token {
     Equal,
     NotEqual,
 
-    BitwiseAnd,
-    LogicalAnd,
-    BitwiseOr,
-    LogicalOr,
+    Ampersand,
+    AmpersandAmpersand,
+    Pipe,
+    PipePipe,
 
     Comma,
     Colon,
@@ -44,7 +44,6 @@ pub(crate) enum Token {
     RightBracket,
 
     Let,
-    Function,
     If,
     Else,
     Return,
@@ -79,10 +78,10 @@ impl fmt::Display for Token {
             Token::Equal => write!(f, "=="),
             Token::NotEqual => write!(f, "!="),
 
-            Token::BitwiseAnd => write!(f, "&"),
-            Token::LogicalAnd => write!(f, "&&"),
-            Token::BitwiseOr => write!(f, "|"),
-            Token::LogicalOr => write!(f, "||"),
+            Token::Ampersand => write!(f, "&"),
+            Token::AmpersandAmpersand => write!(f, "&&"),
+            Token::Pipe => write!(f, "|"),
+            Token::PipePipe => write!(f, "||"),
 
             Token::Comma => write!(f, ","),
             Token::Colon => write!(f, ":"),
@@ -95,7 +94,6 @@ impl fmt::Display for Token {
             Token::LeftBracket => write!(f, "["),
             Token::RightBracket => write!(f, "]"),
 
-            Token::Function => write!(f, "fun"),
             Token::Let => write!(f, "let"),
             Token::True => write!(f, "true"),
             Token::False => write!(f, "false"),
@@ -109,7 +107,6 @@ impl fmt::Display for Token {
 pub(crate) fn lookup_identifier(identifier: &str) -> Token {
     match identifier {
         "let" => Token::Let,
-        "fun" => Token::Function,
         "if" => Token::If,
         "else" => Token::Else,
         "return" => Token::Return,

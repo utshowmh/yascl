@@ -205,18 +205,18 @@ fn evaluate_expression(
                 (Object::Float(left), Token::GreaterOrEqual, Object::Float(right)) => {
                     Ok(Object::Boolean(left >= right))
                 }
-                (Object::Integer(left), Token::BitwiseAnd, Object::Integer(right)) => {
+                (Object::Integer(left), Token::Ampersand, Object::Integer(right)) => {
                     Ok(Object::Integer(left & right))
                 }
-                (Object::Integer(left), Token::BitwiseOr, Object::Integer(right)) => {
+                (Object::Integer(left), Token::Pipe, Object::Integer(right)) => {
                     Ok(Object::Integer(left | right))
                 }
                 (left, Token::Equal, right) => Ok(Object::Boolean(left.equal(&right))),
                 (left, Token::NotEqual, right) => Ok(Object::Boolean(!left.equal(&right))),
-                (left, Token::LogicalAnd, right) => {
+                (left, Token::AmpersandAmpersand, right) => {
                     Ok(Object::Boolean(left.is_truthy() && right.is_truthy()))
                 }
-                (left, Token::LogicalOr, right) => {
+                (left, Token::PipePipe, right) => {
                     Ok(Object::Boolean(left.is_truthy() || right.is_truthy()))
                 }
                 (left, operator, right) => Err(Error::Runtime(format!(
@@ -243,18 +243,18 @@ fn evaluate_expression(
         )),
         Expression::Call(callee, arguments) => {
             let callee = evaluate_expression(callee, Rc::clone(&environment))?;
-            let mut _argumets = vec![];
+            let mut _arguments = vec![];
             for argument in arguments {
                 let argument = evaluate_expression(argument, Rc::clone(&environment))?;
-                _argumets.push(argument);
+                _arguments.push(argument);
             }
             match callee {
                 Object::Function(parameters, body, environment) => {
-                    if parameters.len() != _argumets.len() {
+                    if parameters.len() != _arguments.len() {
                         Err(Error::Runtime(format!(
                             "Expected {} argument(s), got {}",
                             parameters.len(),
-                            _argumets.len()
+                            _arguments.len()
                         )))
                     } else {
                         let local_environment =
@@ -262,12 +262,12 @@ fn evaluate_expression(
                         for i in 0..parameters.len() {
                             local_environment
                                 .borrow_mut()
-                                .set(parameters[i].to_owned(), _argumets[i].to_owned());
+                                .set(parameters[i].to_owned(), _arguments[i].to_owned());
                         }
                         evaluate_block_statement(&body, local_environment)
                     }
                 }
-                Object::Builtin(func) => func(_argumets),
+                Object::Builtin(func) => func(_arguments),
                 object => Err(Error::Runtime(format!("Object '{object}' is not callable"))),
             }
         }
