@@ -219,6 +219,12 @@ impl Parser {
 
     fn parse_literal_expression(&mut self) -> Result<Expression, Error> {
         match self.current_token().to_owned() {
+            Token::PipePipe => {
+                self.advance_position();
+                self.expect_token(Token::Pipe)?;
+                let body = self.parse_block_statement()?;
+                Ok(Expression::Function(vec![], body))
+            }
             Token::Pipe => {
                 self.advance_position();
                 let mut parameters = vec![];

@@ -112,11 +112,9 @@ fn evaluate_expression(
                     }
                 }
                 (Object::Array(array), Object::Range(from, to)) => {
-                    let last_index = array.len() as i64 - 1;
+                    let last_index = array.len() as i64;
                     if from >= 0 && from <= last_index && to >= 0 && to <= last_index {
-                        Ok(Object::Array(
-                            array[from as usize..(to + 1) as usize].to_vec(),
-                        ))
+                        Ok(Object::Array(array[from as usize..to as usize].to_vec()))
                     } else {
                         Err(Error::Runtime(format!(
                             "Index '{}' not valid",
