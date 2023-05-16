@@ -44,6 +44,7 @@ pub(crate) enum Token {
     RightBracket,
 
     Let,
+    Mut,
     If,
     Else,
     Return,
@@ -95,6 +96,7 @@ impl fmt::Display for Token {
             Token::RightBracket => write!(f, "]"),
 
             Token::Let => write!(f, "let"),
+            Token::Mut => write!(f, "mut"),
             Token::True => write!(f, "true"),
             Token::False => write!(f, "false"),
             Token::If => write!(f, "if"),
@@ -107,6 +109,7 @@ impl fmt::Display for Token {
 pub(crate) fn lookup_identifier(identifier: &str) -> Token {
     match identifier {
         "let" => Token::Let,
+        "mut" => Token::Mut,
         "if" => Token::If,
         "else" => Token::Else,
         "return" => Token::Return,

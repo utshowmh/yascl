@@ -30,6 +30,7 @@ impl Display for BlockStatement {
 #[derive(Debug, Clone)]
 pub(crate) enum Statement {
     Let(String, Expression),
+    Mut(String, Expression),
     Return(Expression),
     Expression(Expression),
 }
@@ -38,6 +39,7 @@ impl Display for Statement {
     fn fmt(&self, f: &mut Formatter<'_>) -> Result {
         match self {
             Statement::Let(identifier, value) => write!(f, "let {identifier} = {value}"),
+            Statement::Mut(identifier, value) => write!(f, "mut {identifier} = {value}"),
             Statement::Return(value) => write!(f, "return {value}"),
             Statement::Expression(value) => write!(f, "{value}"),
         }

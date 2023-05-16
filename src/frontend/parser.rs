@@ -38,6 +38,7 @@ impl Parser {
     fn parse_statement(&mut self) -> Result<Statement, Error> {
         match self.current_token() {
             Token::Let => self.parse_let_statement(),
+            Token::Mut => self.parse_mut_statement(),
             Token::Return => self.parse_return_statement(),
             _ => self.parse_expression_statement(),
         }
@@ -50,6 +51,21 @@ impl Parser {
             self.expect_token(Token::Assign)?;
             let value = self.parse_expression()?;
             Ok(Statement::Let(identifier, value))
+        } else {
+            Err(Error::Parser(format!(
+                "Unexpected token '{}', expected IDENTIFIER",
+                self.current_token(),
+            )))
+        }
+    }
+
+    fn parse_mut_statement(&mut self) -> Result<Statement, Error> {
+        self.expect_token(Token::Mut)?;
+        if let Token::Identifier(identifier) = self.current_token().to_owned() {
+            self.advance_position();
+            self.expect_token(Token::Assign)?;
+            let value = self.parse_expression()?;
+            Ok(Statement::Mut(identifier, value))
         } else {
             Err(Error::Parser(format!(
                 "Unexpected token '{}', expected IDENTIFIER",

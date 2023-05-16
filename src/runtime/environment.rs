@@ -23,17 +23,30 @@ impl Environment {
         }
     }
 
-    pub(crate) fn get(&self, identifier: &str) -> Option<Object> {
-        match self.bindings.get(identifier) {
+    pub(crate) fn get(&self, name: &str) -> Option<Object> {
+        match self.bindings.get(name) {
             Some(object) => Some(object.clone()),
             None => self
                 .parent
                 .as_ref()
-                .and_then(|environment| environment.borrow().get(identifier)),
+                .and_then(|environment| environment.borrow().get(name)),
         }
     }
 
     pub(crate) fn set(&mut self, name: String, value: Object) {
         self.bindings.insert(name, value);
+    }
+
+    pub(crate) fn mutate(&mut self, name: &str, value: Object) -> Option<Object> {
+        match self.bindings.get(name) {
+            Some(_) => {
+                self.set(name.to_owned(), value.to_owned());
+                Some(value)
+            }
+            None => self
+                .parent
+                .as_deref()
+                .and_then(|environment| environment.borrow_mut().mutate(name, value)),
+        }
     }
 }

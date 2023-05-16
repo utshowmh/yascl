@@ -18,10 +18,12 @@ let rest = |arr| {
 }
 
 let map = |arr, func| {
+    let acc = []
     for(0, len(arr), |index| {
-        write(func(arr[index]))
+        mut acc = append(acc, func(arr[index]))
     })
+    acc
 }
 
 let arr = [1, 2, 3, 4, 5]
-map(arr, |x| { x * 2 })
+write(map(arr, |x| { x * 2 }))

@@ -49,6 +49,13 @@ fn evaluate_statement(
                 .set(name.to_owned(), value.to_owned());
             Ok(value)
         }
+        Statement::Mut(name, expression) => {
+            let value = evaluate_expression(expression, Rc::clone(&environment))?;
+            environment
+                .borrow_mut()
+                .mutate(&name, value)
+                .ok_or(Error::Runtime(format!("Name '{name}' is not defined")))
+        }
         Statement::Return(expression) => {
             let value = evaluate_expression(expression, Rc::clone(&environment))?;
             Ok(Object::Return(Box::new(value)))
@@ -64,14 +71,10 @@ fn evaluate_expression(
     environment: Rc<RefCell<Environment>>,
 ) -> Result<Object, Error> {
     match expression {
-        Expression::Identifier(identifier) => {
-            environment
-                .borrow()
-                .get(identifier)
-                .ok_or(Error::Runtime(format!(
-                    "Name '{identifier}' is not defined"
-                )))
-        }
+        Expression::Identifier(name) => environment
+            .borrow()
+            .get(name)
+            .ok_or(Error::Runtime(format!("Name '{name}' is not defined"))),
         Expression::Integer(value) => Ok(Object::Integer(*value)),
         Expression::Float(value) => Ok(Object::Float(*value)),
         Expression::String(value) => Ok(Object::String(value.to_owned())),
