@@ -50,6 +50,8 @@ pub(crate) enum Token {
     Return,
     True,
     False,
+    Array,
+    Hash,
 }
 
 impl fmt::Display for Token {
@@ -102,6 +104,8 @@ impl fmt::Display for Token {
             Token::If => write!(f, "if"),
             Token::Else => write!(f, "else"),
             Token::Return => write!(f, "return"),
+            Token::Array => write!(f, "array"),
+            Token::Hash => write!(f, "hash"),
         }
     }
 }
@@ -115,6 +119,8 @@ pub(crate) fn lookup_identifier(identifier: &str) -> Token {
         "return" => Token::Return,
         "true" => Token::True,
         "false" => Token::False,
+        "array" => Token::Array,
+        "hash" => Token::Hash,
         _ => Token::Identifier(identifier.to_owned()),
     }
 }

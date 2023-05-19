@@ -40,8 +40,9 @@ impl fmt::Display for Object {
                 let pairs = pairs
                     .iter()
                     .map(|(k, v)| format!("{k}: {v}"))
-                    .collect::<Vec<String>>();
-                write!(f, "{{{}}}", pairs.join(", "))
+                    .collect::<Vec<String>>()
+                    .join(", ");
+                write!(f, "[{pairs}]")
             }
             Object::Return(value) => write!(f, "{}", *value),
             Object::Function(params, body, _) => {

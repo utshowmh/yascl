@@ -5,7 +5,7 @@ let for = |start, end, func| {
     }
 }
 
-let arr = [1, 2, 3, 4, 5]
+let arr = array[1, 2, 3, 4, 5]
 
 for(0, len(arr), |index| {
     write(arr[index])

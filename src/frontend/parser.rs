@@ -25,16 +25,6 @@ impl Parser {
         Ok(Program { statements })
     }
 
-    fn parse_block_expression(&mut self) -> Result<Expression, Error> {
-        let mut statements = vec![];
-        self.expect_token(Token::LeftBrace)?;
-        while Token::RightBrace.ne(self.current_token()) && Token::Eof.ne(self.current_token()) {
-            statements.push(self.parse_statement()?);
-        }
-        self.expect_token(Token::RightBrace)?;
-        Ok(Expression::Block(statements))
-    }
-
     fn parse_statement(&mut self) -> Result<Statement, Error> {
         match self.current_token() {
             Token::Let => self.parse_let_statement(),
@@ -237,7 +227,7 @@ impl Parser {
         match self.current_token().to_owned() {
             Token::PipePipe => {
                 self.advance_position();
-                let body = self.parse_block_expression()?;
+                let body = self.parse_expression()?;
                 Ok(Expression::Function(vec![], Box::new(body)))
             }
             Token::Pipe => {
@@ -263,17 +253,17 @@ impl Parser {
                     }
                 }
                 self.expect_token(Token::Pipe)?;
-                let body = self.parse_block_expression()?;
+                let body = self.parse_expression()?;
                 Ok(Expression::Function(parameters, Box::new(body)))
             }
             Token::If => {
                 self.advance_position();
                 let condition = self.parse_expression()?;
-                let consequence = self.parse_block_expression()?;
+                let consequence = self.parse_expression()?;
                 let mut alternative = None;
                 if Token::Else.eq(self.current_token()) {
                     self.advance_position();
-                    alternative = Some(self.parse_block_expression()?);
+                    alternative = Some(self.parse_expression()?);
                 }
                 Ok(Expression::If(
                     Box::new(condition),
@@ -282,9 +272,21 @@ impl Parser {
                 ))
             }
             Token::LeftBrace => {
+                let mut statements = vec![];
+                self.expect_token(Token::LeftBrace)?;
+                while Token::RightBrace.ne(self.current_token())
+                    && Token::Eof.ne(self.current_token())
+                {
+                    statements.push(self.parse_statement()?);
+                }
+                self.expect_token(Token::RightBrace)?;
+                Ok(Expression::Block(statements))
+            }
+            Token::Hash => {
                 let mut pairs = vec![];
                 self.advance_position();
-                if Token::ne(self.current_token(), &Token::RightBrace) {
+                self.expect_token(Token::LeftBracket)?;
+                if Token::ne(self.current_token(), &Token::RightBracket) {
                     loop {
                         let key = self.parse_expression()?;
                         self.expect_token(Token::Colon)?;
@@ -298,12 +300,13 @@ impl Parser {
                         }
                     }
                 }
-                self.expect_token(Token::RightBrace)?;
+                self.expect_token(Token::RightBracket)?;
                 Ok(Expression::Hash(pairs))
             }
-            Token::LeftBracket => {
+            Token::Array => {
                 let mut expressions = vec![];
                 self.advance_position();
+                self.expect_token(Token::LeftBracket)?;
                 if Token::ne(self.current_token(), &Token::RightBracket) {
                     loop {
                         expressions.push(self.parse_expression()?);
