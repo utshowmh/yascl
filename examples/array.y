@@ -10,6 +10,6 @@ let rest = |arr| {
     }
 }
 
-let arr = [1, 2, 3, 4, 5]
+let arr = array[1, 2, 3, 4, 5]
 write(first(arr))
 write(rest(arr))

@@ -17,17 +17,6 @@ impl Display for Program {
 }
 
 #[derive(Debug, Clone)]
-pub(crate) struct BlockStatement {
-    pub(crate) statements: Vec<Statement>,
-}
-
-impl Display for BlockStatement {
-    fn fmt(&self, f: &mut Formatter<'_>) -> Result {
-        write!(f, "{{ ... }}")
-    }
-}
-
-#[derive(Debug, Clone)]
 pub(crate) enum Statement {
     Let(String, Expression),
     Mut(String, Expression),
@@ -58,8 +47,9 @@ pub(crate) enum Expression {
     Index(Box<Expression>, Box<Expression>),
     Prefix(Token, Box<Expression>),
     Infix(Box<Expression>, Token, Box<Expression>),
-    If(Box<Expression>, BlockStatement, Option<BlockStatement>),
-    Function(Vec<String>, BlockStatement),
+    Block(Vec<Statement>),
+    If(Box<Expression>, Box<Expression>, Option<Box<Expression>>),
+    Function(Vec<String>, Box<Expression>),
     Call(Box<Expression>, Vec<Expression>),
 }
 
@@ -76,6 +66,7 @@ impl Display for Expression {
             Expression::Index(left, index) => write!(f, "({left}[{index}])"),
             Expression::Prefix(operator, right) => write!(f, "({operator} {right})"),
             Expression::Infix(left, operator, right) => write!(f, "({left} {operator} {right})"),
+            Expression::Block(_) => write!(f, "{{}}"),
             Expression::If(condition, consequence, alternative) => {
                 write!(f, "(if {condition} {consequence}")?;
                 if let Some(alternative) = alternative {

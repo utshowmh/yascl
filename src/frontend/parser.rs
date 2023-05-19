@@ -1,5 +1,5 @@
 use crate::common::{
-    ast::{BlockStatement, Expression, Program, Statement},
+    ast::{Expression, Program, Statement},
     error::Error,
     token::Token,
 };
@@ -25,14 +25,14 @@ impl Parser {
         Ok(Program { statements })
     }
 
-    fn parse_block_statement(&mut self) -> Result<BlockStatement, Error> {
+    fn parse_block_expression(&mut self) -> Result<Expression, Error> {
         let mut statements = vec![];
         self.expect_token(Token::LeftBrace)?;
         while Token::RightBrace.ne(self.current_token()) && Token::Eof.ne(self.current_token()) {
             statements.push(self.parse_statement()?);
         }
         self.expect_token(Token::RightBrace)?;
-        Ok(BlockStatement { statements })
+        Ok(Expression::Block(statements))
     }
 
     fn parse_statement(&mut self) -> Result<Statement, Error> {
@@ -237,8 +237,8 @@ impl Parser {
         match self.current_token().to_owned() {
             Token::PipePipe => {
                 self.advance_position();
-                let body = self.parse_block_statement()?;
-                Ok(Expression::Function(vec![], body))
+                let body = self.parse_block_expression()?;
+                Ok(Expression::Function(vec![], Box::new(body)))
             }
             Token::Pipe => {
                 self.advance_position();
@@ -263,22 +263,22 @@ impl Parser {
                     }
                 }
                 self.expect_token(Token::Pipe)?;
-                let body = self.parse_block_statement()?;
-                Ok(Expression::Function(parameters, body))
+                let body = self.parse_block_expression()?;
+                Ok(Expression::Function(parameters, Box::new(body)))
             }
             Token::If => {
                 self.advance_position();
                 let condition = self.parse_expression()?;
-                let consequence = self.parse_block_statement()?;
+                let consequence = self.parse_block_expression()?;
                 let mut alternative = None;
                 if Token::Else.eq(self.current_token()) {
                     self.advance_position();
-                    alternative = Some(self.parse_block_statement()?);
+                    alternative = Some(self.parse_block_expression()?);
                 }
                 Ok(Expression::If(
                     Box::new(condition),
-                    consequence,
-                    alternative,
+                    Box::new(consequence),
+                    alternative.map(|expression| Box::new(expression)),
                 ))
             }
             Token::LeftBrace => {

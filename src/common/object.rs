@@ -2,7 +2,7 @@ use std::{cell::RefCell, collections::HashMap, fmt, rc::Rc};
 
 use crate::runtime::environment::Environment;
 
-use super::{ast::BlockStatement, error::Error};
+use super::{ast::Expression, error::Error};
 
 #[derive(Debug, Clone)]
 pub(crate) enum Object {
@@ -15,7 +15,7 @@ pub(crate) enum Object {
     Array(Vec<Object>),
     Hash(HashMap<String, Object>),
     Return(Box<Object>),
-    Function(Vec<String>, BlockStatement, Rc<RefCell<Environment>>),
+    Function(Vec<String>, Expression, Rc<RefCell<Environment>>),
     Builtin(BuiltinFunction),
 }
 

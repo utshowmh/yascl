@@ -1,7 +1,7 @@
 use std::{cell::RefCell, collections::HashMap, rc::Rc};
 
 use crate::common::{
-    ast::{BlockStatement, Expression, Program, Statement},
+    ast::{Expression, Program, Statement},
     error::Error,
     object::Object,
     token::Token,
@@ -15,20 +15,6 @@ pub(crate) fn evaluate(
 ) -> Result<Object, Error> {
     let mut value = Object::Null;
     for statement in &program.statements {
-        value = evaluate_statement(statement, Rc::clone(&environment))?;
-        if let Object::Return(value) = value {
-            return Ok(*value);
-        }
-    }
-    Ok(value)
-}
-
-fn evaluate_block_statement(
-    statement: &BlockStatement,
-    environment: Rc<RefCell<Environment>>,
-) -> Result<Object, Error> {
-    let mut value = Object::Null;
-    for statement in &statement.statements {
         value = evaluate_statement(statement, Rc::clone(&environment))?;
         if let Object::Return(value) = value {
             return Ok(*value);
@@ -225,13 +211,23 @@ fn evaluate_expression(
                 ))),
             }
         }
+        Expression::Block(statements) => {
+            let mut value = Object::Null;
+            for statement in statements {
+                value = evaluate_statement(statement, Rc::clone(&environment))?;
+                if let Object::Return(value) = value {
+                    return Ok(*value);
+                }
+            }
+            Ok(value)
+        }
         Expression::If(condition, consequence, alternative) => {
             let condition = evaluate_expression(condition, Rc::clone(&environment))?;
             if condition.is_truthy() {
-                evaluate_block_statement(consequence, Rc::clone(&environment))
+                evaluate_expression(consequence, Rc::clone(&environment))
             } else {
                 if let Some(alternative) = alternative {
-                    evaluate_block_statement(alternative, Rc::clone(&environment))
+                    evaluate_expression(alternative, Rc::clone(&environment))
                 } else {
                     Ok(Object::Null)
                 }
@@ -239,7 +235,7 @@ fn evaluate_expression(
         }
         Expression::Function(parameters, body) => Ok(Object::Function(
             parameters.to_owned(),
-            body.to_owned(),
+            *body.to_owned(),
             Rc::clone(&environment),
         )),
         Expression::Call(callee, arguments) => {
@@ -265,7 +261,7 @@ fn evaluate_expression(
                                 .borrow_mut()
                                 .set(parameters[i].to_owned(), _arguments[i].to_owned());
                         }
-                        evaluate_block_statement(&body, local_environment)
+                        evaluate_expression(&body, local_environment)
                     }
                 }
                 Object::Builtin(func) => func(_arguments),
