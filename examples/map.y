@@ -5,18 +5,6 @@ let for = |start, end, func| {
     }
 }
 
-let first = |arr| {
-    if len(arr) > 0 {
-        arr[0]
-    }
-}
-
-let rest = |arr| {
-    if len(arr) > 1 {
-        arr[1..len(arr)]
-    }
-}
-
 let map = |arr, func| {
     let acc = []
     for(0, len(arr), |index| {

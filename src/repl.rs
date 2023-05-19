@@ -9,11 +9,12 @@ use crate::{
     common::ast::Program,
     frontend::{lexer::Lexer, parser::Parser},
     runtime::{builtin::get_builtin, environment::Environment, evaluator::evaluate},
+    VERSION,
 };
 
 pub fn run() {
     let username = var("LOGNAME").unwrap_or("anonymous".to_string());
-    println!("Hello, {username}! Welcome to YASCL REPL.");
+    println!("Hello, {username}! Welcome to YASCL REPL (version: {VERSION}).");
     let mut environment = Rc::new(RefCell::new(get_builtin()));
 
     loop {

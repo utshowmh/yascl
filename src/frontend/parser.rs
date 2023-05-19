@@ -237,7 +237,6 @@ impl Parser {
         match self.current_token().to_owned() {
             Token::PipePipe => {
                 self.advance_position();
-                self.expect_token(Token::Pipe)?;
                 let body = self.parse_block_statement()?;
                 Ok(Expression::Function(vec![], body))
             }
